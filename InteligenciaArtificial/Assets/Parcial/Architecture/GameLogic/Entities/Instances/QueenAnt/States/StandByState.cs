@@ -42,13 +42,13 @@ namespace Parcial.Architecture.GameLogic.Entities.Instances.QueenAnt.States
 		{
 			BehaviourActions behaviourActions = new BehaviourActions();
 
-			Func<float> deltaTimeAction = (Func<float>)parameters[0];
+			float deltaTimeAction = (float)parameters[0];
 			int teamID = (int)parameters[1];
 
 			behaviourActions.AddMultiThreadableBehaviour(0, () =>
 			{
 				if (deltaTimeAction != null)
-					elapsed += deltaTimeAction.Invoke();
+					elapsed += deltaTimeAction;
 			});
 
 			behaviourActions.AddMultiThreadableBehaviour(1, () =>
