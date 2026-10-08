@@ -1,0 +1,14 @@
+{
+    "name": "ArchitectureAssenbly",
+    "rootNamespace": "",
+    "references": ["GUID:22e81fe8e81a42693b7da79c8409c5a2"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

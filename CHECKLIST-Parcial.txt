@@ -1,0 +1,587 @@
+================================================================================
+  CHECKLIST - PRIMER PARCIAL INTELIGENCIA ARTIFICIAL 2026
+  Entrega: 1/10/2026 18:00 hs (Hora Argentina, UTC-3)
+  Estado: 9 / 60 items completos  (+ 2 parciales: 07 y 08)
+================================================================================
+
+  COMO USAR ESTE ARCHIVO
+  ----------------------
+  Marca un item cambiando [ ] por [x]. Un item padre solo se marca
+  cuando TODAS sus sub-tareas estan marcadas.
+
+  ETIQUETAS DE NOTA (que te da cada item):
+    [ENTREGA]  Condicion de entrega. Si falla, no hay nota.
+    [0-4]      Condicion minima de APROBACION.
+    [4-7]      Condicion minima de PROMOCION.
+    [7-10]     Examen COMPLETO.
+
+  Los items estan ordenados de MAS FACIL a MAS DIFICIL, no por nota.
+  Por eso vas a ver un [7-10] temprano y un [0-4] tarde: mira siempre
+  la etiqueta para saber cuanto vale lo que estas por hacer.
+
+  Las lineas que empiezan con ">" son notas mias: o la evidencia de
+  por que algo ya esta hecho, o donde tenes que tocar para hacerlo.
+
+  REGLAS GENERALES DEL PARCIAL (aplican a todo):
+    - Implementar con las tecnicas vistas en clase. Sin librerias de
+      terceros.
+    - Se corrige el codigo pusheado hasta el dia del examen 18:00.
+    - Demo jugable estilo simulacion 2D + defensa del codigo in situ.
+
+
+================================================================================
+  NIVEL 0 - ENTREGA (trivial de hacer, fatal de olvidar)
+================================================================================
+
+[ ] 01. [ENTREGA] Repositorio GIT PRIVADO creado EXPLICITAMENTE para
+        este parcial
+        [ ] 01a. Verificar en github.com que el repo es PRIVADO
+        [ ] 01b. Confirmar que cuenta como "creado para este parcial"
+        [ ] 01c. Si no cumple: crear repo nuevo privado y migrar todo
+        [ ] 01d. Re-apuntar el remote origin al repo nuevo
+        > ATENCION - RIESGO DE NOTA 0. El PDF dice textual: "Todo lo
+        > entregado debera estar alojado en un repositorio GIT privado
+        > creado explicitamente para este parcial, de lo contrario, la
+        > calificacion sera 0."
+        > Tu remote hoy es github.com/ianco99/IA-2026, que ya tenia
+        > los ejercicios de la cursada de antes. No pude verificar si
+        > es privado (no hay gh CLI instalado en esta maquina).
+        > Esto es lo primero que conviene resolver.
+
+[ ] 02. [ENTREGA] Todo el codigo pusheado antes del 1/10/2026 18:00 hs
+        > Se corrige lo que este en el repo a esa hora. Lo que quede
+        > sin pushear no existe.
+
+[ ] 03. [ENTREGA] Build subida como RELEASE en el repositorio
+        [ ] 03a. Generar la build del proyecto
+        [ ] 03b. Publicarla como Release (no como archivo suelto)
+        [ ] 03c. Verificar que la Release se pueda descargar y correr
+
+[x] 04. [ENTREGA] Sin librerias de terceros
+        > YA CUMPLE: solo paquetes propios de Unity. Mantenerlo asi.
+        > Ojo: nada de asset store ni NuGet para Voronoi/Flocking.
+
+[ ] 05. [ENTREGA] Demo jugable + defensa del codigo preparada
+        [ ] 05a. La demo arranca y corre sin excepciones
+        [ ] 05b. Poder explicar FSM, HSM, BT, A*, Voronoi y Flocking
+        [ ] 05c. Poder justificar decisiones de arquitectura
+
+
+================================================================================
+  NIVEL 1 - YA HECHO (solo verificar)
+================================================================================
+
+[x] 06. [ENTREGA] Logica separada en un assembly independiente del engine
+        > YA HECHO: KuznickiAgents/KuznickiAgents/KuznickiAgents.csproj
+        > es netstandard2.1 y NO referencia Unity.
+
+[ ] 07. [0-4] El codigo de los patrones NO tiene referencia al engine
+        [x] 07a. FSM sin referencia al engine
+        [x] 07b. HSM sin referencia al engine
+        [x] 07c. Behaviour Tree sin referencia al engine
+        [x] 07d. Pathfinding sin referencia al engine
+        [ ] 07e. Flocking sin referencia al engine
+        > 4 de 5 listos. Queda pendiente solo porque Flocking todavia
+        > no existe. Cuando lo escribas, va en la DLL, no en Unity.
+
+[ ] 08. [7-10] El codigo de los patrones esta en una DLL
+        [x] 08a. FSM en la DLL
+        [x] 08b. HSM en la DLL
+        [x] 08c. Behaviour Tree en la DLL
+        [x] 08d. Pathfinding en la DLL
+        [ ] 08e. Flocking en la DLL
+        > Muy avanzado para ser un item de 7-10. La DLL ya existe y
+        > funciona: KuznickiAgents.dll. Solo falta meterle Flocking.
+
+[x] 09. [7-10] La DLL esta compilada al dia y referenciada desde Unity
+        > YA HECHO: Assets/KuznickiAgents.dll es identica a
+        > bin/Release/netstandard2.1/KuznickiAgents.dll, y esta
+        > referenciada en Assembly-CSharp.csproj:481.
+        > RECORDATORIO: cada vez que toques la libreria, recompilar y
+        > volver a copiar la DLL a Assets/. Es facil de olvidar.
+
+[x] 10. [ENTREGA] Input y renderizado en un assembly que SI referencia
+        el engine
+        > YA CUMPLE: el lado Unity es Assembly-CSharp, que referencia
+        > el engine y consume la DLL.
+        > SUGERENCIA (no obligatorio): no hay ningun .asmdef en el
+        > proyecto. Crear uno dejaria la separacion explicita y obvia
+        > para el corrector, en vez de depender del assembly default.
+
+[ ] 11. [0-4] Buen uso de tipos genericos, interfaces y namespaces
+        [x] 11a. Genericos     (Pathfinder<TNodeType>, AddState<TState>)
+        [x] 11b. Interfaces    (IPathfindingNode, IBlackboardReference)
+        [x] 11c. Namespaces    (KuznickiAgents.StatePattern, .Pathfinding)
+        [ ] 11d. Mantener el mismo nivel en TODO el codigo nuevo
+        > Lo que ya existe esta bien. Queda abierto porque se evalua
+        > la entrega final, y todo el dominio de hormigas esta por
+        > escribirse. No aflojar ahi.
+
+[x] 12. [0-4] FSM implementada y funcionando
+        > YA HECHO: StatePattern/FSM.cs (clase Fsm). Completa, con
+        > buckets multihilo y transiciones por flags string.
+
+[x] 13. [0-4] HSM implementada y funcionando
+        > YA HECHO: StatePattern/HSM.cs (clase Hsm). Completa: hereda
+        > transiciones subiendo por la cadena de padres, calcula
+        > ancestro comun, entra/sale solo de los nodos cruzados.
+
+[x] 14. [0-4] Behaviour Tree (libreria de nodos) implementado
+        > YA HECHO: StatePattern/BehaviourTree/ tiene Root, Sequence,
+        > Selector, Parallel, Action, Conditional, Decorator, Invert,
+        > ForceFail, ForceSuccess, Blackboard y NodeState. Sin stubs.
+
+[x] 15. [0-4] Pathfinder<T> generico base implementado
+        > YA HECHO: Pathfinding/Pathfinder.cs. Tiene el loop completo
+        > (open/closed list, costo acumulado + heuristica, backtrack)
+        > y deja 5 hooks abstractos para cada variante.
+        > OJO: el loop existe, pero A* NO. Ver item 46.
+
+
+================================================================================
+  NIVEL 2 - MAPA (facil)
+================================================================================
+
+[X] 16. [0-4] Ancho y alto del mapa configurables por el usuario ANTES
+        de su creacion
+        [X] 16a. Campo de input para el ancho
+        [X] 16b. Campo de input para el alto
+        [X] 16c. El mapa se genera recien al confirmar, no al arrancar
+        > No existe nada de esto todavia. "Antes de su creacion" es
+        > literal: tiene que ser configurable, no una constante.
+
+[X] 17. [0-4] Distancia entre nodos configurable por el usuario ANTES
+        de la creacion del mapa
+        [X] 17a. Campo de input para la distancia horizontal
+        [X] 17b. Campo de input para la distancia vertical
+        [X] 17c. Las dos distancias pueden ser distintas entre si
+        > El PDF aclara "pero con posibles diferentes distancias en
+        > cada eje". No uses un solo float para los dos ejes.
+
+[X] 18. [0-4] Mapa de superficie finita poblado por nodos equidistantes
+        en grilla cuadrada
+        [X] 18a. Nodos equidistantes en horizontal
+        [X] 18b. Nodos equidistantes en vertical
+        [X] 18c. La superficie es finita (bordes bien definidos)
+        [X] 18d. Representacion visual 2D de la grilla
+        > Podes partir de Vector2IntGraph, pero hoy genera una grilla
+        > fija sin espaciado configurable. Hay que generalizarlo.
+
+[X] 19. [0-4] Cantidad N de hormigueros definida por el usuario antes
+        de la creacion, MINIMO 2
+        [X] 19a. Campo de input para N
+        [X] 19b. Validar que N >= 2
+
+[X] 20. [0-4] Cada hormiguero es un rombo ortogonal de 5 casillas de eje
+        [X] 20a. Generar la forma de rombo ortogonal
+        [X] 20b. El eje mide exactamente 5 casillas
+        > Rombo ortogonal = diamante por distancia Manhattan. Con eje
+        > de 5 casillas, el centro tiene radio 2 en cada direccion.
+
+[X] 21. [0-4] El mapa no puede comenzar con areas de hormigueros
+        superpuestas
+        [X] 21a. Detectar solapamiento entre rombos al generar
+        [X] 21b. Reubicar o rechazar posiciones que se solapen
+        [X] 21c. Contemplar el caso "no entran N hormigueros en el mapa"
+
+
+================================================================================
+  NIVEL 3 - POBLACION INICIAL Y RECURSOS (facil)
+================================================================================
+
+[ ] 22. [0-4] Una hormiga reina en el centro del hormiguero
+
+[ ] 23. [0-4] Cinco hormigas obreras en casillas aleatorias dentro del
+        rombo
+
+[ ] 24. [0-4] Tres hormigas guerreras en casillas aleatorias dentro del
+        rombo
+
+[ ] 25. [0-4] Cada 2 segundos aparecen 20 unidades de comida en una
+        casilla aleatoria que no pertenezca a ningun hormiguero
+        [ ] 25a. Timer de 2 segundos
+        [ ] 25b. Elegir casilla aleatoria SIN hormiguero
+        [ ] 25c. Depositar 20 unidades
+        [ ] 25d. Mostrar la comida visualmente
+
+[ ] 26. [0-4] Los huevos eclosionan a los 20 segundos de ser incubados
+        [ ] 26a. Timer de 20 segundos por huevo
+        [ ] 26b. Al eclosionar nace el tipo de hormiga correspondiente
+
+
+================================================================================
+  NIVEL 4 - MECANICAS DE LOS AGENTES (medio)
+================================================================================
+
+  REINA
+  -----
+
+[ ] 27. [0-4] La reina consume 20 unidades de comida para poner un huevo
+        en una de las celdas del rombo INICIAL del hormiguero
+        [ ] 27a. Descontar 20 de comida de la colonia
+        [ ] 27b. Solo puede poner en celdas del rombo inicial
+        [ ] 27c. No puede poner si no hay 20 de comida
+
+[ ] 28. [0-4] Colocar un huevo tiene un cooldown de 30 segundos
+
+[ ] 29. [0-4] La reina decide si pone huevo de obrera o de guerrera
+        segun el estado de su colonia
+        [ ] 29a. Definir que datos miran la decision (comida, cantidad
+                 de obreras/guerreras, amenazas cercanas)
+        [ ] 29b. Implementar la decision
+        > Este es el item donde se luce la FSM de la reina. Que la
+        > decision se vea en la demo, no que sea 50/50 al azar.
+
+  OBRERAS
+  -------
+
+[ ] 30. [0-4] Recolectan UNA unidad de comida por vez, estando en una
+        casilla ADYACENTE a donde este la comida
+
+[ ] 31. [0-4] Deben depositar la comida en una casilla ADYACENTE a su
+        reina
+
+[ ] 32. [0-4] Pueden gastar 10 unidades de comida de la colonia para
+        reclamar una casilla del mapa como parte de su hormiguero,
+        con cooldown de 10 segundos
+        [ ] 32a. Descontar 10 de comida de la colonia
+        [ ] 32b. La casilla pasa a ser del hormiguero
+        [ ] 32c. Cooldown de 10 segundos
+        [ ] 32d. Reflejar el cambio visualmente
+
+  GUERRERAS
+  ---------
+
+[ ] 33. [0-4] Destruyen casillas del mapa de otras hormigas gastando 2
+        unidades de comida, estando PARADAS en la casilla a destruir
+
+[ ] 34. [0-4] Atacan a hormigas de otras colonias desde una casilla
+        ADYACENTE a la hormiga atacada
+
+[ ] 35. [0-4] Ataque a OBRERA: consume 5 de comida y la mata
+
+[ ] 36. [0-4] Ataque a GUERRERA: consume 10 de comida y solo una sale
+        con vida del encuentro
+
+[ ] 37. [0-4] Ataque a HUEVO: consume 1 de comida y lo mata
+
+[ ] 38. [0-4] Ataque a REINA: consume 50 de comida y la mata
+
+[ ] 39. [0-4] Despues de atacar, no puede volver a atacar hasta regresar
+        a una casilla de su hormiguero a descansar 10 segundos
+        [ ] 39a. Marcar la guerrera como "sin descansar" tras atacar
+        [ ] 39b. Debe volver a una casilla propia
+        [ ] 39c. Descansar 10 segundos alli
+        > Esto es lo que justifica usar HSM y no FSM plana: el ciclo
+        > atacar -> volver -> descansar se anida natural.
+
+[ ] 40. [0-4] Una guerrera sin descansar SIEMPRE pierde el encuentro
+        contra otra guerrera
+
+  COLONIA
+  -------
+
+[ ] 41. [0-4] Si la reina de una colonia muere, todas las unidades de
+        esa colonia mueren y todas las celdas de su hormiguero pasan a
+        ser terreno NO reclamado
+        [ ] 41a. Matar todas las unidades de la colonia
+        [ ] 41b. Liberar todas las celdas del hormiguero
+        [ ] 41c. Actualizar la representacion visual
+
+[ ] 42. [0-4] Cada colonia tiene como objetivo expandir su territorio y
+        exterminar a las reinas de las demas colonias
+        > Es el objetivo que ata todo. Se demuestra mostrando que la
+        > simulacion converge sola a que una colonia gana.
+
+
+================================================================================
+  NIVEL 5 - CADA AGENTE CON SU PATRON STATE (medio)
+================================================================================
+
+  > La maquinaria ya existe y esta probada en la DLL (items 12, 13, 14).
+  > Lo que falta son los estados/nodos concretos del dominio hormigas.
+
+[ ] 43. [0-4] La reina utiliza una FSM
+        [ ] 43a. Definir los estados de la reina
+        [ ] 43b. Definir los flags de transicion
+        [ ] 43c. Implementar cada State
+        [ ] 43d. Cablear la Fsm en el agente reina
+        > La clase Fsm nunca fue usada por ningun MonoBehaviour hasta
+        > hoy. Va a ser su primer uso real: probala temprano.
+
+[ ] 44. [0-4] Las obreras utilizan un Behaviour Tree
+        [ ] 44a. Disenar el arbol (buscar comida / llevar / reclamar)
+        [ ] 44b. Implementar los ActionNode concretos
+        [ ] 44c. Implementar los ConditionalNode concretos
+        [ ] 44d. Cablear el arbol en el agente obrera
+        > Tenes Sequence, Selector, Parallel y los decoradores listos.
+
+[ ] 45. [0-4] Las guerreras utilizan una HSM
+        [ ] 45a. Disenar la jerarquia de estados
+        [ ] 45b. Aprovechar que las transiciones se heredan del padre
+        [ ] 45c. Implementar cada State
+        [ ] 45d. Cablear la Hsm en el agente guerrera
+        > Agent.cs (Patrol/Chase/Explode) sirve como ejemplo de como
+        > se arma una Hsm en este proyecto.
+
+
+================================================================================
+  NIVEL 6 - PATHFINDING (dificil)
+================================================================================
+
+[ ] 46. [0-4] Algoritmo A* implementado
+        [ ] 46a. Distance            (heuristica)
+        [ ] 46b. GetNeighbors
+        [ ] 46c. IsBlocked
+        [ ] 46d. MoveToNeighborCost
+        [ ] 46e. NodesEquals
+        > HOY LOS 5 LANZAN NotImplementedException.
+        > Archivo: KuznickiAgents/Pathfinding/AStarPathfinder.cs
+        > (lineas 13, 18, 23, 28, 33).
+        > La buena noticia: el loop de busqueda ya esta hecho en
+        > Pathfinder.cs, solo hay que completar estos 5 metodos.
+        > Podes copiar la forma de DepthFirstPathfinder.cs, que es el
+        > unico que si los tiene implementados.
+
+[ ] 47. [0-4] Cada uno de los tipos de agente navega el mapa con A*
+        [ ] 47a. La reina navega con A*
+        [ ] 47b. Las obreras navegan con A*
+        [ ] 47c. Las guerreras navegan con A*
+
+[ ] 48. [0-4] Transitar nodos del PROPIO hormiguero tiene costo MENOR
+
+[ ] 49. [0-4] Transitar nodos FUERA del hormiguero tiene costo MAYOR
+        > 48 y 49 se resuelven juntos en MoveToNeighborCost, que
+        > necesita saber de que colonia es quien pregunta.
+
+
+================================================================================
+  NIVEL 7 - ALGORITMOS ESPACIALES (dificil)
+================================================================================
+
+  > Voronoi de comida (item 50) ya existe; el de reinas (51) y
+  > Flocking (52) siguen siendo desarrollos desde cero.
+
+[ ] 50. [0-4] Diagrama de Voronoi (o poligono de Thiessen) que
+        representa la proximidad a las celdas de COMIDA
+        [x] 50a. Implementar el calculo de Voronoi
+        [x] 50b. Tomar como sitios las celdas con comida
+        [x] 50c. Recalcular cuando aparece/desaparece comida
+        [ ] 50d. Dibujarlo en pantalla
+        > HECHO (50a-c): Architecture/GameLogic/Voronoi/. VoronoiDiagram
+        > recorta el rectangulo del mapa con la mediatriz contra cada
+        > otro sitio; cada VoronoiArea conoce sus segmentos, vertices
+        > (compartidos) y vecinos. Servicio: VoronoiService.
+        > FoodLogic lo alimenta con EntityCreatedEvent<Food> /
+        > EntityDestroyedEvent y escribe Tile.closestFoodID.
+        > Alta = incremental (solo los vecinos del area nueva).
+        > Baja = COLAPSO: los vertices del area muerta se trasladan al
+        > punto de la comida. Es una aproximacion (IsExact == false)
+        > que se corrige sola antes del proximo cambio. Si el area toca
+        > el borde del mapa se hace un Build completo.
+        > 50d: View/GameLogic/Voronoi/FoodVoronoiView.cs compila pero
+        > FALTA verlo corriendo en el editor antes de tildarlo.
+        > Reusar VoronoiService.CreateDiagram para el item 51.
+
+[ ] 51. [0-4] Los agentes tienen calculado un Voronoi para saber cual es
+        su territorio, tomando como nodo central la casilla donde esta
+        su reina
+        [ ] 51a. Un sitio por reina
+        [ ] 51b. Cada agente consulta su region
+        [ ] 51c. Recalcular si la reina se mueve o muere
+        [ ] 51d. Dibujarlo en pantalla
+
+[ ] 52. [0-4] Las hormigas de una misma colonia evitan superponerse en
+        su representacion visual usando FLOCKING
+        [ ] 52a. Implementar separacion
+        [ ] 52b. Implementar alineacion
+        [ ] 52c. Implementar cohesion
+        [ ] 52d. Aplicarlo solo entre hormigas de la MISMA colonia
+        [ ] 52e. Que no rompa el path de A*
+        > Va en la DLL, sin referencias al engine (items 07 y 08).
+        > El PDF pide puntualmente que no se superpongan VISUALMENTE:
+        > es un ajuste de presentacion sobre el movimiento por grilla.
+
+
+================================================================================
+  NIVEL 8 - PARALELIZACION (dificil)
+================================================================================
+
+[ ] 53. [0-4] Todo aquello que pueda ser paralelizable, debe ser
+        paralelizado
+        [ ] 53a. Identificar que es paralelizable
+        [ ] 53b. Paralelizar el update de agentes
+        [ ] 53c. Paralelizar el calculo de paths
+        [x] 53d. Paralelizar el calculo de los Voronoi
+        > VoronoiDiagram.Rebuild / Heal: Parallel.For por sitio y por
+        > columna de tiles. La mutacion del diagrama es solo main thread.
+        [ ] 53e. Paralelizar el Flocking
+        [ ] 53f. Verificar que no haya condiciones de carrera
+        > Ya tenes el mecanismo: BehaviourActions separa acciones en
+        > bucket main-thread y bucket multihilo, y ParallelNode hace
+        > lo mismo en el BT. Reusalo en vez de inventar otro.
+        > REGLA: todo lo que toque Unity (Transform, Time) va SIEMPRE
+        > en el bucket de main thread. Solo calculo puro va al otro.
+
+
+================================================================================
+  NIVEL 9 - PROMOCION (mas dificil)     [todo este bloque vale 4-7]
+================================================================================
+
+[x] 54. [4-7] Los agentes optimizan el path calculado usando Theta*
+        [x] 54a. Implementar Theta* sobre el path de A*
+        [x] 54b. Verificar linea de vista entre nodos
+        [x] 54c. Descartar nodos intermedios innecesarios
+        > HECHO en la DLL: KuznickiAgents/Pathfinding/
+        > ThetaStarPathfinder.cs. FindPath llama al loop base (A*) y
+        > despues, desde cada nodo, busca el nodo mas lejano del camino
+        > con linea de vista (Bresenham) y reemplaza los intermedios
+        > por los de la linea recta.
+        > Es una opcion mas del enum: PathfindingAlgorithm.ThetaStar.
+        > El path devuelto sigue siendo casilla por casilla (ahora con
+        > pasos en diagonal), asi que LivingEntity no cambio.
+        > FALTA PROBAR en Play: solo se verifico que compila.
+
+[x] 55. [4-7] Theta* solo aplica si los nodos que descarta y por los que
+        fuese a atravesar son TODOS de su propio hormiguero
+        > Es la parte facil de olvidar del item 54. Si el atajo pisa
+        > territorio ajeno o neutral, no se puede optimizar.
+        > HECHO: hook virtual CanOptimizeThrough en ThetaStarPathfinder
+        > (default: no bloqueado). TeamThetaStarPathfinder, en
+        > Architecture/.../Systems/Pathfinding.cs, lo sobreescribe con
+        > Scene.IsTeamAnthillTile. Si no se cumple queda el path de A*.
+
+[ ] 56. [4-7] Cada colonia tiene calculado un Voronoi que tiene en
+        cuenta los COSTOS de transitar por las casillas
+        > Es un Voronoi con pesos, distinto del item 51.
+        > HECHO: Architecture/GameLogic/Voronoi/Weighted/.
+        > WeightedVoronoiDiagram compone un VoronoiDiagram comun y
+        > empuja sus vertices compartidos hasta que todas las areas
+        > pesan parecido (hasta 7 rondas). El peso de una casilla es lo
+        > que le cuesta transitarla a ESA colonia
+        > (Scene.GetTileTravelCost: 1 propia, 2 neutral, 4 enemiga),
+        > por eso hay un diagrama por colonia.
+        > TerritoryLogic los crea en LateInit (uno por equipo, con los
+        > mismos sitios del item 51: las reinas) y los actualiza en
+        > Tick: alta/baja de reina = AddSite/RemoveSite; casilla
+        > reclamada o liberada (TileModifiedEvent) = Rebalance. Los
+        > equipos se recalculan en paralelo (Parallel.For).
+        > Vista: View/GameLogic/Voronoi/WeightedVoronoiView.cs. Arranca
+        > oculta; click IZQUIERDO sobre una reina muestra u oculta el
+        > diagrama de SU colonia, cada colonia en un color (cian,
+        > verde, naranja, azul...). Puede haber varios a la vez. Si la
+        > reina muere, el de su colonia se oculta solo.
+        > Probado SIN Unity (loop de Gameplay en consola, mapa 60x40,
+        > 3 colonias): areas a menos de 1% del promedio en 3 rondas, y
+        > 3000 ticks con reclamos y muertes de reina sin excepciones.
+        > FALTA PROBAR en Play: la vista solo se verifico que compila.
+
+[ ] 57. [4-7] Usa ese diagrama para determinar si el costo de transitar
+        una celda es mayor o menor
+        > HECHO: Map.GetWeightedTravelCost. Cada colonia mira SU
+        > diagrama: si la casilla cae en su propia area paga el costo
+        > normal; si cae en el area de otro hormiguero paga el doble
+        > (RIVAL_AREA_TRAVEL_COST_MULTIPLIER = 2). Nunca baja de 1, asi
+        > la heuristica de A* sigue siendo admisible.
+        > Los tres pathfinders por equipo (A*, Theta*, Dijkstra, en
+        > Systems/Pathfinding.cs) usan Scene.GetTileWeightedTravelCost.
+        > Scene.GetTileTravelCost quedo como costo base: es lo que pesa
+        > el diagrama; si pesara el costo ya ajustado se perseguiria a
+        > si mismo.
+        > FALTA PROBAR en Play: que los paths esquiven areas ajenas.
+
+[ ] 58. [4-7] Se puede cambiar el algoritmo de pathfinding de cada
+        agente EN PARTICULAR en tiempo real
+        [x] 58a. Implementar Dijkstra
+        [x] 58b. Implementar BreadthFirst
+        [x] 58c. Poder cambiar el algoritmo por agente individual
+        [x] 58d. Que el cambio surta efecto sin reiniciar
+        [ ] 58e. UI para elegir el algoritmo
+        > HECHO en la DLL: Pathfinder<T>.FindPath es virtual. A* y
+        > Dijkstra usan el loop base (Dijkstra = heuristica 0);
+        > BreadthFirst (cola) y DepthFirst (pila, ahora si es DFS de
+        > verdad) sobreescriben FindPath.
+        > Por agente: LivingEntity.PathfindingAlgorithm (enum de la
+        > DLL), que LivingEntity.FindPath le pasa al servicio
+        > Pathfinding. Rige desde el proximo path que pida el agente;
+        > el path que ya esta caminando no se recalcula.
+        > A* y Dijkstra respetan el costo por equipo; BreadthFirst y
+        > DepthFirst ignoran costos por definicion.
+        > FALTA 58e: nada en la View cambia ese campo todavia.
+
+
+================================================================================
+  NIVEL 10 - EXAMEN COMPLETO (mas dificil)   [todo este bloque vale 7-10]
+================================================================================
+
+[ ] 59. [7-10] Existe una forma de inyectar comandos al juego que
+        permite instanciar o eliminar unidades en celdas especificas
+        [ ] 59a. Consola o campo de entrada de comandos
+        [ ] 59b. Parsear el comando
+        [ ] 59c. Comando para INSTANCIAR unidad en celda X,Y
+        [ ] 59d. Comando para ELIMINAR unidad en celda X,Y
+        [ ] 59e. Feedback de comando invalido
+
+[ ] 60. [7-10] Es posible ejecutar el assembly independiente del engine
+        en una APLICACION DE CONSOLA, mostrando el progreso con logs
+        [ ] 60a. Crear el proyecto de consola
+        [ ] 60b. Referenciar la libreria de logica
+        [ ] 60c. Loop de simulacion sin Unity
+        [ ] 60d. Logs que muestren el progreso de la partida
+        [ ] 60e. Verificar que corre sin Unity instalado
+        > Este item es el que valida de verdad que la logica no
+        > depende del engine. Si algo quedo atado a Unity, aca explota.
+        > Hoy solo existe KuznickiAgents.csproj (libreria) y el
+        > proyecto Unity. No hay proyecto de consola.
+
+
+================================================================================
+  EXTRA - LIMPIEZA OPCIONAL (NO esta en el PDF, no suma nota)
+================================================================================
+
+  > Cosas rotas que encontre en el repo. No son requisitos del parcial
+  > y probablemente mueran solas cuando armes la simulacion de
+  > hormigas. Anotadas por si te cruzas con ellas y perdes tiempo.
+
+[ ] E1. AgentBT crashea al darle Play
+        > Declara "mines[]" pero la escena todavia serializa el campo
+        > viejo "mine" -> IndexOutOfRangeException en Awake.
+
+[ ] E2. PathfinderScene tiene el GraphView roto
+        > Apunta a un .meta huerfano que quedo fuera del proyecto
+        > Unity -> componente Missing y NullReference en Traveler.
+
+[ ] E3. Vector2IntGraph esta duplicado
+        > Hay una copia en Assets/ y otra en la DLL. La de Assets
+        > tapa a la de la DLL; la de la DLL quedo muerta.
+
+[ ] E4. DepthFirstSearch.cs es codigo muerto
+        > Calcula los vecinos y no los usa, nunca apila nada, ignora
+        > el destino y descarta el path. No lo referencia nadie.
+
+[ ] E5. HSM.cs linea 164 tira NullReference en vez del mensaje de error
+        > Usa destinationNode.Id justo despues de que TryGetValue
+        > fallara, o sea sobre el null que acaba de recibir.
+
+[ ] E6. Fsm.Dispose asume que los ids de estado son 0,1,2...
+        > Si numeras los estados desde 1, tira KeyNotFoundException.
+
+[ ] E7. CLAUDE.md describe una estructura que ya no existe
+        > Habla de Assets/FSM.cs, Assets/HSM/ y del namespace
+        > ImageCampus, todo eso se movio o se renombro.
+
+
+================================================================================
+  RUTA SUGERIDA
+================================================================================
+
+  1. Resolver YA el item 01 (repo privado). Es lo unico que puede
+     convertir todo el resto del trabajo en un 0.
+  2. Despues el item 46 (A*). Es condicion de aprobacion y ademas
+     todos los agentes dependen de el para moverse.
+  3. Recien ahi el mapa y las mecanicas, que son muchos items pero
+     cada uno es corto.
+  4. Voronoi y Flocking (items 50-52) son los tres desarrollos mas
+     grandes desde cero: no los dejes para la ultima semana.
+
+================================================================================

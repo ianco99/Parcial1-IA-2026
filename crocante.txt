@@ -1,0 +1,196 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Agent : MonoBehaviour
+{
+    public enum State
+    {
+        Move,
+        Attack,
+        Banana
+    }
+
+    public enum Triggers
+    {
+        MoveToBanana,
+        BannanaToAttack,
+        AttackToMove,
+        AttackToBanana
+    }
+
+    private FSM<State, Triggers> fsm;
+    public string patata = "PATATA";
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
+    {
+        fsm = new FSM<State, Triggers>(Convert.ToInt32(State.Move));
+        fsm.RegisterTransition(State.Move, Triggers.MoveToBanana, State.Banana);
+        fsm.RegisterTransition(State.Attack, Triggers.AttackToBanana, State.Banana);
+        fsm.RegisterTransition(State.Attack, Triggers.AttackToMove, State.Move);
+        fsm.RegisterTransition(State.Banana, Triggers.BannanaToAttack, State.Attack);
+        fsm.AddState<MoveState>(State.Move, updateParametersPointer: () => new object[] { patata }, constructionParameters: 5);
+        fsm.AddState<BananaState>(State.Banana);
+        fsm.AddState<AttackState>(State.Attack);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        fsm.Update();
+
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            fsm.Trigger(Triggers.AttackToBanana);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            fsm.Trigger(Triggers.AttackToMove);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            fsm.Trigger(Triggers.BannanaToAttack);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            fsm.Trigger(Triggers.MoveToBanana);
+        }
+    }
+
+
+}
+
+public class FSM<StateType, TriggerType>
+    where StateType : Enum
+    where TriggerType : Enum
+{
+    private const int UNASSINGED_TRANSITION = int.MinValue;
+
+    private int[,] transitions;
+    private int currentState;
+
+    private Dictionary<int, State> states;
+
+    private Dictionary<int, Func<object[]>> enterParameters;
+    private Dictionary<int, Func<object[]>> updateParameters;
+    private Dictionary<int, Func<object[]>> exitParameters;
+
+
+    public FSM(int defaultState)
+    {
+        currentState = defaultState;
+        int statesAmount = Enum.GetValues(typeof(StateType)).Length;
+        int triggersAmount = Enum.GetValues(typeof(TriggerType)).Length;
+        transitions = new int[statesAmount, triggersAmount];
+
+        for (int x = 0; x < statesAmount; x++)
+        {
+            for (int y = 0; y < triggersAmount; y++)
+            {
+                transitions[x, y] = UNASSINGED_TRANSITION;
+            }
+        }
+
+        states = new Dictionary<int, State>();
+
+        enterParameters = new Dictionary<int, Func<object[]>>();
+        updateParameters = new Dictionary<int, Func<object[]>>();
+        exitParameters = new Dictionary<int, Func<object[]>>();
+    }
+
+    public void Trigger(Enum trigger)
+    {
+        int destinationState = transitions[currentState, Convert.ToInt32(trigger)];
+        if (destinationState != UNASSINGED_TRANSITION)
+        {
+            states[currentState].OnExit(exitParameters[currentState]?.Invoke());
+            currentState = destinationState;
+            states[currentState].OnEnter(enterParameters[currentState]?.Invoke());
+        }
+    }
+
+    public void RegisterTransition(StateType fromState, TriggerType trigger, StateType toState)
+    {
+        transitions[Convert.ToInt32(fromState), Convert.ToInt32(trigger)] = Convert.ToInt32(toState);
+    }
+
+    public void AddState<TState>(StateType stateType,
+        Func<object[]> enterParametersPointer = null,
+        Func<object[]> updateParametersPointer = null,
+        Func<object[]> exitParametersPointer = null,
+        params object[] constructionParameters)
+        where TState : State
+    {
+        TState state = (TState)Activator.CreateInstance(typeof(TState), constructionParameters);
+        state.OnTrigger += Trigger;
+        int stateValue = Convert.ToInt32(stateType);
+        states.Add(stateValue, state);
+        enterParameters.Add(stateValue, enterParametersPointer);
+        updateParameters.Add(stateValue, updateParametersPointer);
+        exitParameters.Add(stateValue, exitParametersPointer);
+    }
+
+    public void Update()
+    {
+        states[currentState].Update(updateParameters[currentState]?.Invoke());
+    }
+}
+
+public abstract class State
+{
+    public Action<Enum> OnTrigger;
+
+    public abstract void OnEnter(params object[] parameters);
+    public abstract void Update(params object[] parameters);
+    public abstract void OnExit(params object[] parameters);
+}
+
+public sealed class MoveState : State
+{
+    public MoveState(int a)
+    {
+    }
+
+    public override void Update(params object[] parameters)
+    {
+        string patata = (string)parameters[0];
+        Debug.Log("Move: " + patata);
+
+        OnTrigger?.Invoke(Agent.Triggers.MoveToBanana);
+    }
+
+    public override void OnEnter(params object[] parameters)
+    {
+        Debug.Log("Enter - Move");
+    }
+    public override void OnExit(params object[] parameters)
+    {
+        Debug.Log("Exit - Move");
+    }
+}
+public sealed class AttackState : State
+{
+    public override void Update(params object[] parameters)
+    {
+        Debug.Log("Attack");
+    }
+    public override void OnEnter(params object[] parameters)
+    {
+    }
+    public override void OnExit(params object[] parameters)
+    {
+    }
+}
+public sealed class BananaState : State
+{
+    public override void Update(params object[] parameters)
+    {
+        Debug.Log("Banana");
+    }
+    public override void OnEnter(params object[] parameters)
+    {
+    }
+    public override void OnExit(params object[] parameters)
+    {
+    }
+}
