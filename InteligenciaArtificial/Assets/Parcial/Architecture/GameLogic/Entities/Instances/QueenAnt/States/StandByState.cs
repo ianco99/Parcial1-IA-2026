@@ -71,7 +71,7 @@ namespace Parcial.Architecture.GameLogic.Entities.Instances.QueenAnt.States
 			{
 				if (CanSpawnEgg && availableEggPoint != default && hasFood)
 				{
-					OnEggPointFound.Invoke(availableEggPoint);
+					OnEggPointFound?.Invoke(availableEggPoint);
 					OnTrigger?.Invoke(Entities.QueenAnt.Flags.OnEggToSpawn.ToString());
 				}
 			});
