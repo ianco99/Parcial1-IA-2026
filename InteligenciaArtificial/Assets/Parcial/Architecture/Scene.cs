@@ -256,6 +256,8 @@ namespace Parcial.Architecture
 			return teamController != null ? teamController.DepositedFood : 0;
 		}
 
+		public bool IsAnthillTile(Point point) => map.IsAnthillTile(point);
+
 		public bool IsTeamAnthillTile(Point point, int teamId) =>
 			map.IsAnthillTile(point) && map.IsTileFromTeam(point, teamId);
 

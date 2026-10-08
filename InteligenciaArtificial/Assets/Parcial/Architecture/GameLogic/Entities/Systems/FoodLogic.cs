@@ -119,7 +119,7 @@ public sealed class FoodLogic : IInitable, ITickable, IDisposable
 
         chosen = new Coordinate(x, y);
 
-        if(Scene.IsCoordinateEmpty(chosen))
+        if(Scene.IsCoordinateEmpty(chosen) && !Scene.IsAnthillTile(chosen.Origin))
         {
             EventBus.Raise<SpawnRequestAcceptedEvent<Food>>(EntitiesLogic.GetFoodBlueprint(), chosen, TableNames.ANTS_TABLE_NAME, -1);
         }
