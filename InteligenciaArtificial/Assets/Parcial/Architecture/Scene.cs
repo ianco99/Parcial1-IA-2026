@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using ianco99.ToolBox.DataFlow;
+﻿using ianco99.ToolBox.DataFlow;
 using ianco99.ToolBox.Events;
 using ianco99.ToolBox.Services;
 using Parcial.Architecture.Config;
-using Parcial.Architecture.Console;
 using Parcial.Architecture.GameLogic.Controllers.Anthill;
 using Parcial.Architecture.GameLogic.Controllers.Anthill.Events;
 using Parcial.Architecture.GameLogic.Controllers.ChangePathfinding;
@@ -20,6 +16,8 @@ using Parcial.Architecture.GameLogic.Map;
 using Parcial.Architecture.GameLogic.Map.Events;
 using Parcial.Architecture.GameLogic.Voronoi;
 using Parcial.Architecture.Math;
+using System;
+using System.Collections.Generic;
 
 namespace Parcial.Architecture
 {

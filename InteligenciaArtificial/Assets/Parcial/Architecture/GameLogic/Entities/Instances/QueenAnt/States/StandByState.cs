@@ -11,24 +11,15 @@ namespace Parcial.Architecture.GameLogic.Entities.Instances.QueenAnt.States
 	{
 		private Scene Scene => ServiceProvider.Instance.GetService<Scene>();
 
-		private Entities.QueenAnt queenAnt;
-		
 		private float cooldown = Entities.QueenAnt.EGG_COOLDOWN;
 		private float elapsed = 0.0f;
 
 		private Point availableEggPoint;
+		private Action<Point> OnEggPointFound;
 		private bool hasFood;
 
 		private bool CanSpawnEgg => elapsed >= cooldown;
 
-		private int teamID;
-
-		public StandByState(params object[] parameters)
-		{
-			teamID = (int)parameters[0];
-			queenAnt = (Entities.QueenAnt)parameters[1];
-		}
-		
 
 		public override BehaviourActions GetOnEnterBehaviours(params object[] parameters)
 		{
@@ -52,6 +43,7 @@ namespace Parcial.Architecture.GameLogic.Entities.Instances.QueenAnt.States
 			BehaviourActions behaviourActions = new BehaviourActions();
 
 			Func<float> deltaTimeAction = (Func<float>)parameters[0];
+			int teamID = (int)parameters[1];
 
 			behaviourActions.AddMultiThreadableBehaviour(0, () =>
 			{
@@ -63,7 +55,7 @@ namespace Parcial.Architecture.GameLogic.Entities.Instances.QueenAnt.States
 			{
 				if (CanSpawnEgg)
 				{
-					FindEggSpot();
+					FindEggSpot(teamID);
 				}
 			});
 
@@ -71,7 +63,7 @@ namespace Parcial.Architecture.GameLogic.Entities.Instances.QueenAnt.States
 			{
 				if (CanSpawnEgg)
 				{
-					FindFood();
+					FindFood(teamID);
 				}
 			});
 
@@ -79,8 +71,7 @@ namespace Parcial.Architecture.GameLogic.Entities.Instances.QueenAnt.States
 			{
 				if (CanSpawnEgg && availableEggPoint != default && hasFood)
 				{
-					queenAnt.eggSpawnPoint = availableEggPoint;
-					queenAnt.eggHatchType = queenAnt.DecideEggType();
+					OnEggPointFound.Invoke(availableEggPoint);
 					OnTrigger?.Invoke(Entities.QueenAnt.Flags.OnEggToSpawn.ToString());
 				}
 			});
@@ -88,12 +79,12 @@ namespace Parcial.Architecture.GameLogic.Entities.Instances.QueenAnt.States
 			return behaviourActions;
 		}
 
-		private void FindFood()
+		private void FindFood(int teamID)
 		{
 			hasFood = Scene.GetStoredFoodAmount(teamID) >= Entities.QueenAnt.EGG_FOOD_COST;
 		}
 
-		private void FindEggSpot()
+		private void FindEggSpot(int teamID)
 		{
 			
 			SpawnTeamControllerArchitecture teamController = Scene.GetSpawnTeamControllerArchitecture(teamID);

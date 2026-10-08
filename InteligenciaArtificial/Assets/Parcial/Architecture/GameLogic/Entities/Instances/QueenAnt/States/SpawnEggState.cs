@@ -6,6 +6,7 @@ using Parcial.Architecture.GameLogic.Controllers.SpawnEntities.Events;
 using Parcial.Architecture.GameLogic.Entities.Events;
 using Parcial.Architecture.GameLogic.Entities.Systems;
 using Parcial.Architecture.Math;
+using System;
 
 namespace Parcial.Architecture.GameLogic.Entities.Instances.QueenAnt.States
 {
@@ -16,29 +17,23 @@ namespace Parcial.Architecture.GameLogic.Entities.Instances.QueenAnt.States
 		private Scene Scene => ServiceProvider.Instance.GetService<Scene>();
 		private EntityRegistry EntityRegistry => ServiceProvider.Instance.GetService<EntityRegistry>();
 
-		private Entities.QueenAnt queenAnt;
 
-		private bool isAwaitingResponse;
-		private bool isRequestAccepted;
-		private bool isRequestDeclined;
 
-		public SpawnEggState(params object[] parameters)
-		{
-			queenAnt = (Entities.QueenAnt)parameters[0];
-		}
+
 
 		public override BehaviourActions GetOnEnterBehaviours(params object[] parameters)
 		{
 			BehaviourActions behaviourActions =  new BehaviourActions();
 
+			Action<bool> awaitingResponse = parameters[0] as Action<bool>;
+			Action<bool> requestAccepted = parameters[1] as Action<bool>;
+			Action<bool> requestDeclined = parameters[2] as Action<bool>;
+
 			behaviourActions.AddMainThreadableBehaviour(0, () =>
 			{
-				isAwaitingResponse = false;
-				isRequestAccepted = false;
-				isRequestDeclined = false;
-
-				EventBus.Subscribe<EntityCreatedEvent<EggAnt.EggAnt>>(OnEggCreated);
-				EventBus.Subscribe<SpawnRequestRejectedEvent<EggAnt.EggAnt>>(OnSpawnRequestDeclined);
+				awaitingResponse.Invoke(false);
+                requestAccepted.Invoke(false);
+                requestDeclined.Invoke(false);
 			});
 
 			return behaviourActions;
@@ -48,23 +43,36 @@ namespace Parcial.Architecture.GameLogic.Entities.Instances.QueenAnt.States
 		{
 			BehaviourActions behaviourActions = new BehaviourActions();
 
-			behaviourActions.AddMainThreadableBehaviour(0, () =>
+			Point eggPoint = (Point)parameters[0];
+			int teamID = (int)parameters[1];
+			
+			Action retryEggType = (Action)parameters[2];
+
+            Action<bool> awaitingResponse = parameters[3] as Action<bool>;
+            Action<bool> requestDeclined = parameters[4] as Action<bool>;
+
+            Func<bool> TryEggPoint = parameters[5] as Func<bool>;
+			bool isAwaitingResponse = (bool)parameters[6];
+			bool isRequestAccepted = (bool)parameters[7];
+			bool isRequestDeclined = (bool)parameters[8];
+
+            behaviourActions.AddMainThreadableBehaviour(0, () =>
 			{
 				if (isAwaitingResponse || isRequestAccepted)
 					return;
 
-				if (isRequestDeclined && !TryRefreshEggSpawnPoint())
+				if (isRequestDeclined && !TryEggPoint.Invoke())
 					return;
 
 				if (isRequestDeclined)
-					queenAnt.eggHatchType = queenAnt.DecideEggType();
+					retryEggType?.Invoke();
 
-				isRequestDeclined = false;
+                requestDeclined.Invoke(false);
 
-				isAwaitingResponse = true;
+				awaitingResponse.Invoke(true);
 
 				EventBus.Raise<SpawnRequestEvent<EggAnt.EggAnt>>(EntitiesLogic.GetEggAntBlueprint(),
-					new Coordinate(queenAnt.eggSpawnPoint), queenAnt.teamID);
+					new Coordinate(eggPoint), teamID);
 			});
 
 			behaviourActions.SetTransitionBehaviour(() =>
@@ -80,46 +88,7 @@ namespace Parcial.Architecture.GameLogic.Entities.Instances.QueenAnt.States
 		{
 			BehaviourActions behaviourActions = new BehaviourActions();
 
-			behaviourActions.AddMainThreadableBehaviour(0, () =>
-			{
-				EventBus.UnSubscribe<EntityCreatedEvent<EggAnt.EggAnt>>(OnEggCreated);
-				EventBus.UnSubscribe<SpawnRequestRejectedEvent<EggAnt.EggAnt>>(OnSpawnRequestDeclined);
-			});
-
 			return behaviourActions;
-		}
-
-		private void OnEggCreated(in EntityCreatedEvent<EggAnt.EggAnt> callback)
-		{
-			if (callback.entityTeamID != queenAnt.teamID || !isAwaitingResponse)
-				return;
-
-			EntityRegistry.GetAs<EggAnt.EggAnt>(callback.EntityCreatedId).HatchType = queenAnt.eggHatchType;
-
-			isAwaitingResponse = false;
-			isRequestAccepted = true;
-		}
-
-		private void OnSpawnRequestDeclined(in SpawnRequestRejectedEvent<EggAnt.EggAnt> callback)
-		{
-			if (callback.teamId != queenAnt.teamID || !isAwaitingResponse)
-				return;
-
-			isAwaitingResponse = false;
-			isRequestDeclined = true;
-		}
-
-		private bool TryRefreshEggSpawnPoint()
-		{
-			Coordinate anthill = Scene.GetSpawnTeamControllerArchitecture(queenAnt.teamID)
-				.SpawnAnthillControllerArchitecture.MyAnthill;
-
-			Point point = Scene.GetEmptyAnthillPoint(anthill, queenAnt.teamID);
-			if (point == default)
-				return false;
-
-			queenAnt.eggSpawnPoint = point;
-			return true;
 		}
 	}
 }
