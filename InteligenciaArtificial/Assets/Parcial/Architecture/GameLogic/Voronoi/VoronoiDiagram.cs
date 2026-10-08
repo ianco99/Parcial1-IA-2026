@@ -26,7 +26,8 @@ namespace Parcial.Architecture.GameLogic.Voronoi
 
         private readonly List<VoronoiArea> collapsed;
 
-        private object refreshLock;
+        private object refreshLock = new object();
+        private object clippingLock = new object();
 
         public bool IsExact => collapsed.Count == 0;
 
@@ -144,13 +145,17 @@ namespace Parcial.Architecture.GameLogic.Voronoi
 
 
             //Reclip all neighboring areas
-            foreach (uint neighborId in GetUniqueNeighborTags(polygon))
+            Parallel.ForEach(GetUniqueNeighborTags(polygon), (uint neighborId) =>
             {
                 VoronoiArea neighbor = areas[neighborId];
 
                 SetPolygon(neighbor, Clip(neighbor.GetRawVertices(), neighbor.Node, node));
-                clipped.Add(neighbor);
-            }
+
+                lock (clippingLock)
+                {
+                    clipped.Add(neighbor);
+                }
+            });
 
             return clipped;
         }
@@ -620,11 +625,10 @@ namespace Parcial.Architecture.GameLogic.Voronoi
             });
 
             // The tile a node stands on is always its own, however its area got stretched.
-            //TODO:
-            foreach (VoronoiArea area in affected)
+            Parallel.ForEach(affected, (area) =>
             {
                 modifiedTileOwners[area.Node.tile.x, area.Node.tile.y] = area.Node.id;
-            }
+            });
         }
 
         // The tiles these areas hold go to the closest of their nodes, which is what their exact shapes say.
@@ -654,8 +658,6 @@ namespace Parcial.Architecture.GameLogic.Voronoi
 
         private void RefreshVoronoi()
         {
-            refreshLock = new object();
-
             lock (refreshLock)
             {
                 tileOwners = modifiedTileOwners;
