@@ -28,11 +28,28 @@ namespace Parcial.Architecture.GameLogic.Voronoi
 
         private object refreshLock = new object();
         private object clippingLock = new object();
+        private object discardLock = new object();
+        private object areaLock = new object();
+        private object vertexLock = new object();
 
         public bool IsExact => collapsed.Count == 0;
 
         public IReadOnlyDictionary<uint, VoronoiArea> Areas => areas;
-        public IReadOnlyCollection<VoronoiVertex> Vertices => vertices;
+        public IReadOnlyCollection<VoronoiVertex> Vertices
+        {
+            get
+            {
+                List<VoronoiVertex> vertexs = new List<VoronoiVertex>();
+
+                lock (vertexLock)
+                {
+                    vertexs.AddRange(vertices);
+                }
+
+                return vertexs;
+            }
+        }
+
 
         public uint[,] TileOwners => tileOwners;
 
@@ -147,7 +164,11 @@ namespace Parcial.Architecture.GameLogic.Voronoi
             //Reclip all neighboring areas
             Parallel.ForEach(GetUniqueNeighborTags(polygon), (uint neighborId) =>
             {
-                VoronoiArea neighbor = areas[neighborId];
+                VoronoiArea neighbor;
+                lock (areaLock)
+                {
+                    neighbor = areas[neighborId];
+                }
 
                 SetPolygon(neighbor, Clip(neighbor.GetRawVertices(), neighbor.Node, node));
 
@@ -229,10 +250,10 @@ namespace Parcial.Architecture.GameLogic.Voronoi
                     return false;
             }
 
-            for (int i = 0; i < affected.Count; i++)
+            Parallel.For(0, affected.Count, (i) =>
             {
                 UpdateAreaGeometry(affected[i], newVertices[i], newTags[i]);
-            }
+            });
 
             foreach (VoronoiVertex vertex in dead.vertices)
             {
@@ -263,10 +284,10 @@ namespace Parcial.Architecture.GameLogic.Voronoi
 
             Parallel.For(0, healed.Count, i => { polygons[i] = ClipArea(healed[i].Node, snapshot); });
 
-            for (int i = 0; i < healed.Count; i++)
+            Parallel.For(0, healed.Count, i =>
             {
                 SetPolygon(healed[i], polygons[i]);
-            }
+            });
 
             // The tiles followed the stretched shapes: now they follow the exact ones.
             Relink(healed);
@@ -277,7 +298,10 @@ namespace Parcial.Architecture.GameLogic.Voronoi
         private void Rebuild()
         {
             areas.Clear();
-            vertices.Clear();
+
+            lock (vertexLock)
+                vertices.Clear();
+
             collapsed.Clear();
 
             VoronoiNode[] snapshot = nodes.ToArray();
@@ -290,10 +314,10 @@ namespace Parcial.Architecture.GameLogic.Voronoi
                 areas.Add(snapshot[i].id, new VoronoiArea(snapshot[i]));
             }
 
-            for (int i = 0; i < snapshot.Length; i++)
+            Parallel.For(0, snapshot.Length, i =>
             {
                 SetPolygon(areas[snapshot[i].id], polygons[i]);
-            }
+            });
 
             Relink(areas.Values);
 
@@ -497,8 +521,12 @@ namespace Parcial.Architecture.GameLogic.Voronoi
 
             foreach (VoronoiVertex vertex in resolved)
             {
-                if (vertex.areas.Count == 0)
-                    vertices.Remove(vertex);
+                lock (vertexLock)
+                {
+                    if (vertex.areas.Count == 0)
+                        vertices.Remove(vertex);
+                }
+
             }
         }
 
@@ -506,11 +534,11 @@ namespace Parcial.Architecture.GameLogic.Voronoi
         {
             List<VoronoiVertex> oldVertices = area.vertices;
 
-            foreach (VoronoiVertex vertex in newVertices)
+            Parallel.ForEach(newVertices, vertex =>
             {
                 if (!vertex.areas.Contains(area))
                     vertex.areas.Add(area);
-            }
+            });
 
             area.SetGeometry(newVertices, newTags);
 
@@ -523,25 +551,37 @@ namespace Parcial.Architecture.GameLogic.Voronoi
 
         private void Release(VoronoiVertex vertex, VoronoiArea area)
         {
-            vertex.areas.Remove(area);
+            lock (vertexLock)
+            {
+                vertex.areas.Remove(area);
 
-            if (vertex.areas.Count == 0)
-                vertices.Remove(vertex);
+                if (vertex.areas.Count == 0)
+                    vertices.Remove(vertex);
+            }
+
         }
 
         private VoronoiVertex GetOrCreateVertex(double x, double y)
         {
-            foreach (VoronoiVertex existing in vertices)
+            lock (vertexLock)
             {
-                if (System.Math.Abs(existing.x - x) < VERTEX_SNAP && System.Math.Abs(existing.y - y) < VERTEX_SNAP)
-                    return existing;
+                foreach (VoronoiVertex existing in vertices)
+                {
+                    if (System.Math.Abs(existing.x - x) < VERTEX_SNAP && System.Math.Abs(existing.y - y) < VERTEX_SNAP)
+                        return existing;
+                }
             }
 
             bool isOnMapBorder = x < VERTEX_SNAP || y < VERTEX_SNAP || x > width - VERTEX_SNAP || y > height - VERTEX_SNAP;
 
             VoronoiVertex vertex = new VoronoiVertex(x, y, isOnMapBorder);
-            vertices.Add(vertex);
+
+            lock (vertexLock)
+            {
+                vertices.Add(vertex);
+            }
             return vertex;
+
         }
 
         private void Relink(IEnumerable<VoronoiArea> changed)
@@ -555,12 +595,16 @@ namespace Parcial.Architecture.GameLogic.Voronoi
 
                 foreach (VoronoiArea neighbor in area.neighbors)
                 {
-                    if (areas.ContainsKey(neighbor.Node.id) && !toRelink.Contains(neighbor))
-                        toRelink.Add(neighbor);
+                    lock (areaLock)
+                    {
+                        if (areas.ContainsKey(neighbor.Node.id) && !toRelink.Contains(neighbor))
+                            toRelink.Add(neighbor);
+
+                    }
                 }
             }
 
-            foreach (VoronoiArea area in toRelink)
+            Parallel.ForEach(toRelink, area =>
             {
                 area.neighbors.Clear();
 
@@ -570,7 +614,7 @@ namespace Parcial.Architecture.GameLogic.Voronoi
                         !area.neighbors.Contains(neighbor))
                         area.neighbors.Add(neighbor);
                 }
-            }
+            });
         }
 
         // A tile goes to the new node when it is closer to it than to the node that had it.
