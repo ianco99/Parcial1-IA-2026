@@ -31,6 +31,8 @@ namespace Parcial.Architecture.GameLogic.Voronoi
         private readonly uint[,] tileOwners;
         private readonly int[,] weights;
 
+        private object vertexLock = new object();
+
         private VoronoiVertex[] vertices;
 
         public IReadOnlyDictionary<uint, WeightedVoronoiArea> Areas => areas;
@@ -221,13 +223,13 @@ namespace Parcial.Architecture.GameLogic.Voronoi
 
         private void ReadWeights()
         {
-            for (int x = 0; x < width; x++)
+            Parallel.For(0, width, x =>
             {
                 for (int y = 0; y < height; y++)
                 {
                     weights[x, y] = tileWeight(new Point(x, y));
                 }
-            }
+            });
         }
 
         private void RefreshPolygons()
@@ -239,10 +241,10 @@ namespace Parcial.Architecture.GameLogic.Voronoi
                 if (area.polygon.Length != baseVertices.Count)
                     area.polygon = new (double x, double y)[baseVertices.Count];
 
-                for (int i = 0; i < baseVertices.Count; i++)
+                Parallel.For(0, baseVertices.Count, i =>
                 {
                     area.polygon[i] = PositionOf(baseVertices[i]);
-                }
+                });
             }
         }
 
@@ -260,15 +262,14 @@ namespace Parcial.Architecture.GameLogic.Voronoi
             foreach (WeightedVoronoiArea area in areas.Values)
             {
                 (int minX, int minY, int maxX, int maxY) bounds = VoronoiGeometry.TileBounds(area.polygon, width, height);
-                //Parrallel
-                for (int x = bounds.minX; x <= bounds.maxX; x++)
+                Parallel.For(bounds.minX, bounds.maxX, x =>
                 {
                     for (int y = bounds.minY; y <= bounds.maxY; y++)
                     {
                         if (area.Contains(x + 0.5, y + 0.5))
                             tileOwners[x, y] = area.Node.id;
                     }
-                }
+                });
             }
 
             foreach (WeightedVoronoiArea area in areas.Values)
@@ -345,15 +346,22 @@ namespace Parcial.Architecture.GameLogic.Voronoi
         private Dictionary<VoronoiVertex, (double x, double y)> ApplyMoves((double x, double y)[] moves)
         {
             Dictionary<VoronoiVertex, (double x, double y)> applied = new Dictionary<VoronoiVertex, (double x, double y)>();
-            //parallel
-            for (int i = 0; i < moves.Length; i++)
+
+            Parallel.For(0, moves.Length, i =>
             {
                 if (moves[i].x == 0.0 && moves[i].y == 0.0)
-                    continue;
+                {
 
-                applied.Add(vertices[i], moves[i]);
-                Displace(vertices[i], moves[i].x, moves[i].y);
-            }
+                }
+                else
+                {
+                    lock (vertexLock)
+                    {
+                        applied.Add(vertices[i], moves[i]);
+                        Displace(vertices[i], moves[i].x, moves[i].y);
+                    }
+                }
+            });
 
             return applied;
         }

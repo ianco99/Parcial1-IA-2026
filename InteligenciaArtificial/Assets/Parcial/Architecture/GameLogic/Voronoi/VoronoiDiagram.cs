@@ -28,7 +28,6 @@ namespace Parcial.Architecture.GameLogic.Voronoi
 
         private object refreshLock = new object();
         private object clippingLock = new object();
-        private object discardLock = new object();
         private object areaLock = new object();
         private object vertexLock = new object();
 
